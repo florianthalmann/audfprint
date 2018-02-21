@@ -150,10 +150,12 @@ def do_cmd(cmd, analyzer, hash_tab, filename_iter, matcher, outdir, type, report
             report(file_precompute(analyzer, filename, outdir, type, skip_existing=skip_existing, strip_prefix=strip_prefix))
 
     elif cmd == 'match':
+        msgs = []
         # Running query, single-core mode
         for num, filename in enumerate(filename_iter):
-            msgs = matcher.file_match_to_msgs(analyzer, hash_tab, filename, num)
-            report(msgs)
+            msgs.append(matcher.file_match_to_msgs(analyzer, hash_tab, filename, num))
+            #report(msgs)
+        return msgs
 
     elif cmd == 'new' or cmd == 'add':
         # Adding files
@@ -459,7 +461,7 @@ def main(argv):
                          strip_prefix=args['--wavdir'],
                          ncores=ncores)
     else:
-        do_cmd(cmd, analyzer, hash_tab, filename_iter,
+        result = do_cmd(cmd, analyzer, hash_tab, filename_iter,
                matcher, args['--precompdir'], precomp_type, report,
                skip_existing=args['--skip-existing'],
                strip_prefix=args['--wavdir'])
@@ -475,6 +477,8 @@ def main(argv):
     if hash_tab and hash_tab.dirty:
         # We already created the directory, if "new".
         hash_tab.save(dbasename)
+
+    return result
 
 
 # Run the main function if called from the command line
